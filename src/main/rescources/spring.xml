@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--<context:component-scan base-package="com.baizhi.service"></context:component-scan>
+
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/bxy"/>
+        <property name="username" value="root"/>
+        <property name="password" value="root"/>
+    </bean>
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sessionFactory">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:com/baizhi/dao/*DaoMapper.xml"/>
+        <property name="typeAliasesPackage" value="com.baizhi.entity"/>
+    </bean>-->
+
+
+
+    <!--扫描 全局@Controller @Service @AutoWired 注解-->
+   <context:component-scan base-package="com.baizhi"></context:component-scan>
+    <context:component-scan base-package="com.baizhi">
+        <!--mvc.xml中已经创建过，排除在外-->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"></context:exclude-filter>
+
+    </context:component-scan>
+
+     <!--读取项目中的小配置文件，读取之后在spring的配置文件可以使用${key}获取value值
+    system-properties-mode="NEVER"，写活，可以让spg不从系统中获取username的值，如果不配置文件${username}获取的主机名(了解)-->
+
+    <context:property-placeholder location="classpath:jdbc.properties" system-properties-mode="NEVER"/>
+
+   <!--1.数据库连接池  注入属性：驱动类  url  username  password-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="${className}"></property>
+        <property name="url" value="${url}"></property>
+        <property name="username" value="${username}"></property>
+        <property name="password" value="${password}"></property>
+        <!--初始连接数-->
+        <property name="initialSize" value="${initialSize}"></property>
+        <!--最大连接池-->
+        <property name="maxActive" value="${maxActive}"></property>
+        <!--最大等待时间-->
+        <property name="maxWait" value="${maxWait}"></property>
+        <!--最大空闲数-->
+        <property name="maxIdle" value="${maxIdle}"></property>
+    </bean>
+
+
+    <bean class="org.mybatis.spring.SqlSessionFactoryBean" id="sessionFactory">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="mapperLocations" value="classpath:com/baizhi/dao/*DaoMapper.xml"/>
+        <property name="typeAliasesPackage" value="com.baizhi.entity"/>
+    </bean>
+
+    <!--创建DAO对象-->
+    <bean  class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+        <property name="basePackage" value="com.baizhi.dao"/>
+    </bean>
+    <!--创建事务管理器-->
+    <bean class="org.springframework.jdbc.datasource.DataSourceTransactionManager" id="dataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+	
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+	
+	
+</beans>
